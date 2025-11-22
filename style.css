@@ -1,0 +1,767 @@
+/* =========================================
+   1. RESET & CONFIGURATION GLOBALE
+   ========================================= */
+
+/* On remet à zéro les marges de tous les éléments pour éviter
+   les décalages par défaut des navigateurs (Chrome, Firefox, etc.) */
+   * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Permet de gérer les tailles (padding inclus dans la largeur) */
+  }
+  
+  html {
+    scroll-behavior: smooth; /* Active le défilement fluide pour les ancres (#) */
+  }
+  
+  body {
+    font-family: "Poppins", sans-serif; /* Police moderne et lisible */
+    color: #fff; /* Texte blanc par défaut */
+    
+    /* Création du fond animé avec un dégradé complexe */
+    background: linear-gradient(135deg, #430c74, #1c2a50, #0f1738);
+    background-size: 300% 300%; /* On zoome dans le dégradé pour pouvoir le bouger */
+    animation: bgMove 12s ease infinite; /* Animation douce de 12s en boucle */
+    
+    overflow-x: hidden; /* Empêche le site de dépasser sur la droite (scroll horizontal) */
+  }
+  
+  /* Style des titres H2 pour toutes les sections (About, Projects, etc.) */
+  section h2 {
+    font-size: 2.8rem;
+    margin-bottom: 40px;
+    text-align: center;
+    letter-spacing: 2px; /* Espacement des lettres pour un effet titre élégant */
+  }
+  
+  /* =========================================
+     2. ANIMATIONS (KEYFRAMES)
+     ========================================= */
+  
+  /* Fait bouger le fond d'écran en diagonale */
+  @keyframes bgMove {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  /* Animation d'apparition (utilisée par le JS) : le contenu monte et devient opaque */
+  @keyframes glowIn {
+    0% {
+      opacity: 0;
+      text-shadow: 0 0 0px rgba(255,255,255,0);
+      transform: translateY(50px); /* Départ 50px plus bas */
+    }
+    60% {
+      opacity: 1;
+      text-shadow: 0 0 20px rgba(255,255,255,0.6); /* Petit flash lumineux */
+    }
+    100% {
+      opacity: 1;
+      text-shadow: 0 0 0px rgba(255,255,255,0);
+      transform: translateY(0); /* Arrivée à sa place */
+    }
+  }
+  
+  /* Animation des barres de compétences (s'étirent de 0 à 100%) */
+  @keyframes loadBar {
+    to {
+        transform: scaleX(1); 
+    }
+  }
+  
+  /* Classe utilitaire ajoutée par JS pour faire disparaître des éléments au scroll */
+  .fade-out {
+    opacity: 0 !important;
+    transform: translateY(-50px) !important;
+    filter: blur(10px); /* Ajoute un flou cinétique lors de la disparition */
+  }
+  
+  /* =========================================
+     3. NAVBAR (MENU DE NAVIGATION)
+     ========================================= */
+  
+  .navbar {
+    position: fixed; /* Le menu reste collé en haut même quand on scroll */
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 15px 40px;
+    
+    /* Flexbox pour écarter les liens (gauche) du bouton CV (droite) */
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    
+    z-index: 1000; /* S'assure que le menu est au-dessus de tout le reste */
+    
+    /* Effet Glassmorphism (Verre dépoli) */
+    background: rgba(0, 0, 0, 0.2); 
+    backdrop-filter: blur(10px); 
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    
+    /* Préparation de l'animation d'arrivée du menu */
+    transform: translateY(-100%); /* Caché vers le haut par défaut */
+    transition: transform 0.5s ease-in-out;
+  }
+  
+  /* Classe ajoutée par JS quand on descend dans la page */
+  .navbar.visible {
+    transform: translateY(0); /* Le menu descend */
+  }
+  
+  .nav-links {
+    display: flex;
+    list-style: none; /* Enlève les puces de la liste */
+    gap: 30px; /* Espace entre les liens */
+  }
+  
+  .nav-links a {
+    text-decoration: none; /* Enlève le soulignement moche par défaut */
+    color: #fff;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: color 0.3s ease;
+    position: relative;
+  }
+  
+  /* Création de la petite barre bleue qui apparait sous le lien au survol */
+  .nav-links a::after {
+    content: '';
+    display: block;
+    width: 0; /* Invisible au début */
+    height: 2px;
+    background: #aecbff;
+    transition: width 0.3s;
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+  }
+  
+  .nav-links a:hover::after {
+    width: 100%; /* S'étire au survol */
+  }
+  
+  .nav-links a:hover {
+    color: #aecbff;
+  }
+  
+  /* Bouton de téléchargement du CV */
+  .btn-cv {
+    text-decoration: none;
+    color: #fff;
+    border: 2px solid #fff;
+    padding: 8px 20px;
+    border-radius: 25px; /* Bords très ronds */
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .btn-cv:hover {
+    background: #fff;
+    color: #1c2a50; /* Texte sombre sur fond blanc pour le contraste */
+    transform: translateY(-2px); /* Petit saut vers le haut */
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+  }
+  
+  /* SWITCH DE LANGUE (FR/EN) */
+  .lang-fr { display: none; } /* Caché par défaut */
+  
+  /* Si le mode FR est activé sur le body, on cache l'anglais et montre le français */
+  body.fr-mode .lang-en { display: none !important; }
+  body.fr-mode .lang-fr { display: inline-block; }
+  
+  .lang-switch {
+    display: flex;
+    gap: 10px;
+    margin-right: 20px;
+    border-right: 1px solid rgba(255,255,255,0.3); /* Petite barre de séparation verticale */
+    padding-right: 20px;
+  }
+  
+  .lang-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.5); /* Grisé par défaut */
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: color 0.3s;
+  }
+  
+  .lang-btn:hover { color: #fff; }
+  .lang-btn.active {
+    color: #aecbff; /* Bleu clair pour la langue active */
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  
+  /* Compensation pour que le menu fixe ne cache pas le titre quand on clique sur un lien */
+  section {
+    scroll-margin-top: 100px; 
+  }
+  
+  /* =========================================
+     4. SECTION ACCUEIL (WELCOME)
+     ========================================= */
+  #welcome {
+      height: 100vh; /* Prend 100% de la hauteur de l'écran */
+      display: flex;
+      justify-content: center; /* Centre horizontalement */
+      align-items: center;     /* Centre verticalement */
+      flex-direction: column;
+      position: relative; 
+      z-index: 10;
+  }
+  
+  #welcome h1 {
+      font-size: 4.5rem;
+      margin-bottom: 15px;
+      letter-spacing: 3px;
+      text-align: center;
+      transition: all 0.8s ease-out;
+  }
+  
+  #welcome p {
+      font-size: 1.2rem;
+      opacity: 0.8;
+      margin-top: 20px;
+      transition: all 0.8s ease-out;
+  }
+  
+  /* =========================================
+     5. SECTION A PROPOS (ABOUT)
+     ========================================= */
+  #about {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding: 50px 20px;
+  }
+  
+  .content-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      gap: 30px; 
+      opacity: 0; /* Invisible au début, le JS le rendra visible */
+  }
+  
+  .content-wrapper.active {
+      animation: glowIn 1.5s ease-out forwards;
+  }
+  
+  /* Style des "Bulles" (Glassmorphism) */
+  .about-box {
+      background: rgba(255, 255, 255, 0.08); /* Blanc très transparent */
+      padding: 35px 45px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 650px;
+      backdrop-filter: blur(10px); /* Le flou magique derrière la boite */
+      box-shadow: 0px 0px 25px rgba(0,0,0,0.25);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      border: 1px solid rgba(255,255,255,0.1); /* Bordure subtile */
+  }
+  
+  .about-box h3 {
+      font-size: 1.8rem;
+      color: #fff;
+      margin-bottom: 20px;
+      font-weight: 600;
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      padding-bottom: 10px;
+      width: 100%;
+  }
+  
+  /* Lignes d'informations avec icônes */
+  .info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 1.1rem;
+  }
+  
+  .info i, .emoji-icon {
+      font-size: 1.4rem;
+      width: 28px;
+      text-align: center;
+      color: #ffffffc9;
+  }
+  
+  .info a {
+      color: #c7d8ff;
+      text-decoration: none;
+      transition: 0.2s;
+  }
+  
+  .info a:hover {
+      color: #ffffff;
+      text-decoration: underline;
+  }
+  
+  .brand-link {
+    color: #aecbff;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  
+  .brand-link:hover {
+    color: #fff;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+  }
+  
+  .separator {
+      border: 0;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.2);
+      margin: 10px 0;
+      width: 100%;
+  }
+  
+  /* --- Barres de compétences (Technical Skills) --- */
+  .skill-container {
+    margin-bottom: 15px;
+    width: 100%;
+  }
+  
+  .skill-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+    font-size: 1rem;
+    font-weight: 500;
+  }
+  
+  /* Le "rail" de la barre de progression */
+  .progress-bar {
+    width: 100%;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden; /* Coupe ce qui dépasse pour garder les bords ronds */
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+  }
+  
+  /* La partie remplie colorée */
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6a11cb, #2575fc);
+    border-radius: 10px;
+    
+    /* Animation */
+    animation: loadBar 2s ease-out forwards;
+    transform-origin: left;
+    transform: scaleX(0); /* Commence à 0 */
+  }
+  
+  /* =========================================
+     6. SECTION PROJETS (GRID SYSTEM)
+     ========================================= */
+  #projects {
+    min-height: 100vh;
+    padding: 50px 20px;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .projects-grid {
+    display: grid;
+    /* Grid responsive : crée autant de colonnes que possible, min 300px de large */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+    gap: 30px;
+    width: 100%;
+    max-width: 1000px;
+  }
+  
+  .project-card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .project-card:hover {
+    transform: translateY(-5px); /* La carte monte au survol */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    background: rgba(255, 255, 255, 0.12);
+  }
+  
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    gap: 15px;
+  }
+  
+  .card-header h3 {
+    font-size: 1.5rem;
+    margin: 0;
+  }
+  
+  .project-date {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    font-style: italic;
+    white-space: nowrap; /* Empêche la date de se casser sur 2 lignes */
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+  
+  /* Badges (Tags) */
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .tag {
+    font-size: 0.8rem;
+    padding: 5px 12px;
+    border-radius: 50px;
+    font-weight: 500;
+  }
+  
+  .tag.tech { background: rgba(100, 200, 255, 0.2); color: #cceeff; }
+  
+  /* Gestion des couleurs de statut */
+  .tag.status.archived {
+    background: rgba(255, 100, 100, 0.2);
+    color: #ffcccc;
+    border: 1px solid rgba(255, 100, 100, 0.3);
+  }
+  
+  .tag.status.ongoing {
+    background: rgba(50, 255, 160, 0.15); 
+    color: #80ffc0;
+    border: 1px solid rgba(50, 255, 160, 0.3);
+  }
+  
+  .card-body {
+    flex-grow: 1; /* Pousse le footer vers le bas pour aligner les boutons */
+    margin-bottom: 20px;
+    line-height: 1.6;
+    font-size: 1rem;
+  }
+  
+  .btn-access {
+    display: inline-block;
+    padding: 10px 25px;
+    border: 2px solid #fff;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 30px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-align: center;
+  }
+  
+  .btn-access:hover {
+    background-color: #fff;
+    color: #1c2a50;
+    transform: scale(1.05);
+  }
+  
+  /* Sur PC, cette carte prend toute la largeur de la grille */
+  @media (min-width: 768px) {
+    .full-width {
+        grid-column: 1 / -1; 
+    }
+  }
+  
+  /* =========================================
+     7. EXPERIENCES & EDUCATION (TIMELINE)
+     ========================================= */
+  #experiences, #education, #references {
+      min-height: auto;
+      padding: 80px 20px; /* Plus d'espace vertical */
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+  }
+  
+  .timeline {
+      position: relative;
+      max-width: 800px;
+      width: 100%;
+      margin: 0 auto;
+      /* Ligne verticale de la frise */
+      border-left: 2px solid rgba(255, 255, 255, 0.2);
+      padding-left: 40px;
+  }
+  
+  .timeline-item {
+      position: relative;
+      margin-bottom: 50px;
+  }
+  
+  .timeline-item:last-child { margin-bottom: 0; }
+  
+  /* Le point sur la frise */
+  .timeline-dot {
+      position: absolute;
+      left: -46px; /* Calculé pour être centré sur la ligne (-40px padding - 6px rayon) */
+      top: 0;
+      width: 12px;
+      height: 12px;
+      background-color: #aecbff;
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(174, 203, 255, 0.8);
+      border: 2px solid #1c2a50;
+  }
+  
+  .timeline-dot.active {
+    background-color: #80ffc0; /* Vert pour "Actuel" */
+    box-shadow: 0 0 10px rgba(128, 255, 192, 0.8);
+  }
+  
+  .timeline-content {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 25px;
+      position: relative;
+      transition: transform 0.3s ease;
+  }
+  
+  .timeline-content:hover {
+      transform: translateX(10px);
+      background: rgba(255, 255, 255, 0.12);
+  }
+  
+  .timeline-date {
+      display: inline-block;
+      font-size: 0.85rem;
+      color: #aecbff;
+      margin-bottom: 5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+  }
+  
+  .timeline-content h3 {
+      font-size: 1.4rem;
+      margin-bottom: 5px;
+      color: #fff;
+  }
+  
+  .timeline-company {
+      display: block;
+      font-size: 1rem;
+      font-style: italic;
+      opacity: 0.8;
+      margin-bottom: 15px;
+  }
+  
+  .mission-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+  }
+  
+  .mission-list {
+      list-style-type: none;
+      padding-left: 0;
+  }
+  
+  .mission-list li {
+      position: relative;
+      padding-left: 20px;
+      margin-bottom: 5px;
+      opacity: 0.9;
+      font-size: 0.95rem;
+  }
+  
+  /* Puce personnalisée (petite flèche) */
+  .mission-list li::before {
+      content: "▹";
+      position: absolute;
+      left: 0;
+      color: #aecbff;
+  }
+  
+  /* =========================================
+     8. REFERENCES (CARTES SPÉCIALES)
+     ========================================= */
+  .reference-card {
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+    padding: 30px 20px;
+  }
+  
+  .ref-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 25px;
+  }
+  
+  /* Avatar avec l'initiale */
+  .ref-avatar {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #aecbff, #1c2a50);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+    box-shadow: 0 0 15px rgba(174, 203, 255, 0.3);
+  }
+  
+  .ref-role {
+    color: #aecbff;
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+  
+  .ref-contacts {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+  
+  .contact-btn {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    text-decoration: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .contact-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    border-color: #aecbff;
+  }
+  
+  /* =========================================
+     9. FOOTER (PIED DE PAGE)
+     ========================================= */
+  footer {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    padding: 50px 0 20px 0;
+    margin-top: 80px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+  }
+  
+  .footer-content h3 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+    font-weight: 600;
+  }
+  
+  .footer-content p {
+    font-size: 1rem;
+    opacity: 0.8;
+    margin-bottom: 25px;
+  }
+  
+  .footer-socials {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    margin-bottom: 30px;
+  }
+  
+  .footer-socials a {
+    color: #fff;
+    font-size: 1.6rem;
+    transition: transform 0.3s ease, color 0.3s ease;
+  }
+  
+  .footer-socials a:hover {
+    color: #aecbff;
+    transform: translateY(-5px);
+  }
+  
+  .footer-bottom {
+    margin-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 20px;
+    font-size: 0.85rem;
+    opacity: 0.6;
+  }
+  
+  /* =========================================
+     10. RESPONSIVE (MOBILE)
+     ========================================= */
+  @media (max-width: 768px) {
+    .navbar {
+        padding: 15px;
+        flex-direction: column;
+        gap: 15px;
+        background: rgba(28, 42, 80, 0.95); /* Moins transparent sur mobile pour lisibilité */
+    }
+  
+    .nav-links {
+        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+        font-size: 0.85rem;
+    }
+    
+    .nav-links a { font-size: 0.85rem; }
+  }
+  
+  /* =========================================
+     11. CUSTOM SCROLLBAR (BARRE DE DÉFILEMENT)
+     ========================================= */
+  
+  /* Pour Webkit (Chrome, Safari, Edge) */
+  ::-webkit-scrollbar { width: 10px; }
+  
+  ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #aecbff, #430c74);
+    border-radius: 10px;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #c7d8ff, #6a11cb);
+  }
+  
+  /* Pour Firefox */
+  body {
+    scrollbar-width: thin;
+    scrollbar-color: #aecbff rgba(0, 0, 0, 0.1);
+  }
