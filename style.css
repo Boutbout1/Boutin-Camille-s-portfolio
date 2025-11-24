@@ -163,7 +163,7 @@
   
   .btn-cv:hover {
     background: #fff;
-    color: #1c2a50; /* Texte sombre sur fond blanc pour le contraste */
+    color: #1c2a50; /* Texte sombre sur fond blanc */
     transform: translateY(-2px); /* Petit saut vers le haut */
     box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
   }
@@ -266,7 +266,7 @@
       border-radius: 20px;
       width: 100%;
       max-width: 650px;
-      backdrop-filter: blur(10px); /* Le flou magique derrière la boite */
+      backdrop-filter: blur(10px); /* Le flou derrière la boite */
       box-shadow: 0px 0px 25px rgba(0,0,0,0.25);
       display: flex;
       flex-direction: column;
@@ -764,4 +764,5 @@
   body {
     scrollbar-width: thin;
     scrollbar-color: #aecbff rgba(0, 0, 0, 0.1);
+
   }
