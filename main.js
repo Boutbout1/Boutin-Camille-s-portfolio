@@ -98,7 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
             btnFr.classList.remove('active');
 
             // Change le lien du CV
-            cvLink.href = "cv.pdf"; // Remplace par "cv.pdf" si ton CV anglais s'appelle comme ça
+            cvLink.href = "cv.pdf"; 
             cvLink.setAttribute('download', 'CV_Camille_Boutin_EN.pdf');
         });
     }
@@ -107,7 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // --- FONCTIONS UTILITAIRES (HORS du DOMContentLoaded) ---
 
-// La fonction magique pour le scroll lent
+// La fonction pour le scroll lent
 function smoothScroll(target, duration) {
     const targetPosition = target.getBoundingClientRect().top;
     const startPosition = window.pageYOffset;
@@ -131,4 +131,5 @@ function smoothScroll(target, duration) {
     }
 
     requestAnimationFrame(animation);
+
 }
